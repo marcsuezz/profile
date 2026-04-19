@@ -176,39 +176,52 @@
 
       <div class="footer">&copy; 2026 Created by Marcsuezz.</div>
     </div>
-    <script>
-      // 1. Tempelkan link CSV dari Google Sheets kamu di sini
-      const sheetURL =
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTryeaR9gLAo4ZuK5j47MwP7kf4pvceOI-_RFXUZ2uF-d3aIlTPpJy3MbVcYEWLHrMwDVvnJaRJiHAr/pub?gid=0&single=true&output=csv";
+   <script>
+      // 1. Pastikan link CSV kamu dimasukkan ke sini (jangan sampai terhapus)
+      const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTryeaR9gLAo4ZuK5j47MwP7kf4pvceOI-_RFXUZ2uF-d3aIlTPpJy3MbVcYEWLHrMwDVvnJaRJiHAr/pub?gid=0&single=true&output=csv";
 
       async function updateLinks() {
         try {
           const response = await fetch(sheetURL);
           const data = await response.text();
 
-          // Mengubah teks CSV menjadi baris-baris data
-          const rows = data.split("\n").slice(1); // Ambil data saja, abaikan header
+          const rows = data.split("\n").slice(1); 
 
           rows.forEach((row) => {
-            const [nama, url] = row.split(",");
+            const cleanRow = row.replace(/\r/g, ""); 
+            const [nama, url] = cleanRow.split(",");
 
             if (nama && url) {
-              // Mencari tombol berdasarkan teks di dalamnya (misal: "Canva Pro")
               const allLinks = document.querySelectorAll(".link-card");
+              
               allLinks.forEach((link) => {
-                if (link.innerText.trim().includes(nama.trim())) {
-                  link.href = url.trim();
+                const teksTombol = link.innerText.trim().toLowerCase();
+                const namaDiSheet = nama.trim().toLowerCase();
+
+                if (teksTombol.includes(namaDiSheet)) {
+                  
+                  // --- PERBAIKAN OTOMATISASI URL ADA DI SINI ---
+                  let urlFinal = url.trim();
+                  
+                  // Jika url belum diawali dengan http:// atau https://
+                  if (!urlFinal.startsWith("http://") && !urlFinal.startsWith("https://")) {
+                    // Tambahkan https:// di depannya secara otomatis
+                    urlFinal = "https://" + urlFinal;
+                  }
+
+                  // Masukkan URL yang sudah bersih dan valid ke tombol
+                  link.href = urlFinal; 
+                  
+                  console.log(`✅ Berhasil update: ${namaDiSheet} -> ${urlFinal}`);
                 }
               });
             }
           });
-          console.log("Link berhasil diperbarui dari Google Sheets!");
         } catch (error) {
-          console.error("Gagal mengambil data:", error);
+          console.error("❌ Gagal mengambil data dari Sheet:", error);
         }
       }
 
-      // Jalankan fungsi saat halaman dimuat
       updateLinks();
     </script>
   </body>
